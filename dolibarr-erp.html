@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dolibarr ERP/CRM — Sistema de Gestión Empresarial</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #1a1d26;
+    --border: #252836;
+    --accent: #4f8ef7;
+    --accent2: #7c5cfc;
+    --accent3: #00d4aa;
+    --accent4: #f7934f;
+    --accent5: #f74f7a;
+    --text: #e8eaf0;
+    --text2: #8b90a0;
+    --text3: #555968;
+    --success: #00c87a;
+    --warning: #f7c948;
+    --danger: #f74f5a;
+    --sidebar-w: 260px;
+    --header-h: 64px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position:fixed; left:0; top:0; bottom:0; width:var(--sidebar-w);
+    background:var(--surface); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; z-index:100;
+    transition:transform .3s ease;
+  }
+  .sidebar-logo {
+    padding:20px 22px 16px;
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:12px;
+  }
+  .logo-icon {
+    width:38px; height:38px; border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-weight:800; font-size:16px; color:#fff;
+    flex-shrink:0;
+  }
+  .logo-text { font-family:'Syne',sans-serif; font-weight:800; font-size:17px; }
+  .logo-sub { font-size:10px; color:var(--text2); letter-spacing:.08em; text-transform:uppercase; }
+  .sidebar-nav { flex:1; overflow-y:auto; padding:12px 0; }
+  .nav-section { padding:8px 22px 4px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); font-weight:500; }
+  .nav-item {
+    display:flex; align-items:center; gap:12px;
+    padding:10px 16px 10px 22px; cursor:pointer;
+    color:var(--text2); font-size:13.5px; font-weight:400;
+    border-left:3px solid transparent; transition:all .18s ease;
+    position:relative;
+  }
+  .nav-item:hover { color:var(--text); background:var(--surface2); }
+  .nav-item.active {
+    color:var(--accent); background:rgba(79,142,247,.08);
+    border-left-color:var(--accent); font-weight:500;
+  }
+  .nav-item .nav-icon { font-size:16px; width:20px; text-align:center; flex-shrink:0; }
+  .nav-badge {
+    margin-left:auto; background:var(--accent5); color:#fff;
+    font-size:10px; padding:1px 6px; border-radius:10px; font-weight:600;
+  }
+  .sidebar-footer { padding:16px 22px; border-top:1px solid var(--border); }
+  .user-card { display:flex; align-items:center; gap:10px; }
+  .user-avatar {
+    width:34px; height:34px; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent2),var(--accent));
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; color:#fff; flex-shrink:0;
+  }
+  .user-name { font-size:13px; font-weight:500; }
+  .user-role { font-size:11px; color:var(--text2); }
+
+  /* ── MAIN ── */
+  .main { margin-left:var(--sidebar-w); min-height:100vh; display:flex; flex-direction:column; }
+
+  /* ── HEADER ── */
+  .header {
+    height:var(--header-h); background:var(--surface);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; padding:0 28px;
+    position:sticky; top:0; z-index:50; gap:16px;
+  }
+  .header-title { font-family:'Syne',sans-serif; font-weight:700; font-size:18px; flex:1; }
+  .header-title span { color:var(--text2); font-weight:400; font-size:14px; margin-left:8px; font-family:'DM Sans',sans-serif; }
+  .header-actions { display:flex; align-items:center; gap:8px; }
+  .btn {
+    padding:8px 16px; border-radius:8px; border:none; cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+    transition:all .18s ease; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:hover { background:#3d7de6; transform:translateY(-1px); }
+  .btn-secondary { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+  .btn-secondary:hover { background:var(--border); }
+  .btn-success { background:var(--success); color:#fff; }
+  .btn-danger { background:var(--danger); color:#fff; }
+  .btn-sm { padding:6px 12px; font-size:12px; }
+  .btn-xs { padding:4px 8px; font-size:11px; border-radius:6px; }
+  .icon-btn {
+    width:36px; height:36px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface2); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:15px; transition:all .15s; color:var(--text2);
+  }
+  .icon-btn:hover { background:var(--border); color:var(--text); }
+
+  /* ── CONTENT ── */
+  .content { flex:1; padding:28px; }
+
+  /* ── MODULE PAGES ── */
+  .module-page { display:none; animation:fadeSlide .3s ease; }
+  .module-page.active { display:block; }
+  @keyframes fadeSlide { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── DASHBOARD ── */
+  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  .kpi-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:20px; position:relative; overflow:hidden;
+  }
+  .kpi-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--kpi-color,var(--accent));
+  }
+  .kpi-label { font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--text2); margin-bottom:8px; }
+  .kpi-value { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; margin-bottom:4px; }
+  .kpi-change { font-size:12px; color:var(--success); display:flex; align-items:center; gap:4px; }
+  .kpi-change.down { color:var(--danger); }
+  .kpi-icon { position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:36px; opacity:.12; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .card {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px;
+  }
+  .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .card-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+  .card-subtitle { font-size:12px; color:var(--text2); margin-top:2px; }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; }
+  thead tr { background:var(--surface2); }
+  th { padding:11px 16px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text2); font-weight:600; white-space:nowrap; }
+  td { padding:12px 16px; font-size:13px; border-top:1px solid var(--border); vertical-align:middle; }
+  tbody tr { transition:background .12s; }
+  tbody tr:hover { background:var(--surface2); }
+
+  /* ── STATUS BADGES ── */
+  .badge {
+    display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px;
+    font-size:11px; font-weight:600; letter-spacing:.03em; white-space:nowrap;
+  }
+  .badge-success { background:rgba(0,200,122,.15); color:var(--success); }
+  .badge-warning { background:rgba(247,201,72,.15); color:var(--warning); }
+  .badge-danger { background:rgba(247,79,90,.15); color:var(--danger); }
+  .badge-info { background:rgba(79,142,247,.15); color:var(--accent); }
+  .badge-purple { background:rgba(124,92,252,.15); color:var(--accent2); }
+  .badge-orange { background:rgba(247,147,79,.15); color:var(--accent4); }
+  .badge-teal { background:rgba(0,212,170,.15); color:var(--accent3); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; }
+  .progress-fill { height:100%; border-radius:3px; transition:width .6s ease; }
+
+  /* ── AVATAR ── */
+  .avatar {
+    width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; flex-shrink:0;
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .form-group { margin-bottom:16px; }
+  .form-label { font-size:12px; font-weight:500; color:var(--text2); display:block; margin-bottom:6px; }
+  .form-input, .form-select, .form-textarea {
+    width:100%; padding:9px 13px; background:var(--surface2); border:1px solid var(--border);
+    border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;
+    outline:none; transition:border .15s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--accent); }
+  .form-textarea { resize:vertical; min-height:80px; }
+  .form-select { cursor:pointer; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.7);
+    z-index:500; align-items:center; justify-content:center;
+    backdrop-filter:blur(4px);
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    width:90%; max-width:560px; max-height:90vh; overflow-y:auto;
+    animation:modalIn .25s ease;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+  .modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .modal-title { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; }
+  .modal-close { background:none; border:none; color:var(--text2); cursor:pointer; font-size:20px; line-height:1; transition:color .15s; }
+  .modal-close:hover { color:var(--text); }
+  .modal-body { padding:20px 24px; }
+  .modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+
+  /* ── SEARCH BAR ── */
+  .search-bar {
+    display:flex; align-items:center; gap:8px; padding:0 12px;
+    background:var(--surface2); border:1px solid var(--border); border-radius:8px;
+    height:36px;
+  }
+  .search-bar input { background:none; border:none; outline:none; color:var(--text); font-size:13px; width:200px; font-family:'DM Sans',sans-serif; }
+  .search-bar input::placeholder { color:var(--text3); }
+
+  /* ── TABS ── */
+  .tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:20px; }
+  .tab-btn {
+    padding:10px 18px; font-size:13px; font-weight:500; cursor:pointer;
+    color:var(--text2); border:none; background:none; border-bottom:2px solid transparent;
+    margin-bottom:-1px; transition:all .15s; font-family:'DM Sans',sans-serif;
+  }
+  .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .tab-btn:hover:not(.active) { color:var(--text); }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* ── STAT MINI ── */
+  .stat-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+  .stat-row:last-child { border-bottom:none; }
+  .stat-label { font-size:13px; color:var(--text2); display:flex; align-items:center; gap:8px; }
+  .stat-val { font-size:13px; font-weight:600; }
+
+  /* ── ACTIVITY FEED ── */
+  .activity-item { display:flex; gap:12px; padding:10px 0; }
+  .activity-dot { width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+  .activity-content { flex:1; }
+  .activity-title { font-size:13px; }
+  .activity-time { font-size:11px; color:var(--text2); margin-top:2px; }
+
+  /* ── CHART BARS ── */
+  .chart-bars { display:flex; align-items:flex-end; gap:8px; height:100px; }
+  .chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .chart-bar { width:100%; border-radius:4px 4px 0 0; min-height:4px; transition:height .5s ease; }
+  .chart-bar-label { font-size:10px; color:var(--text2); }
+
+  /* ── GANTT ── */
+  .gantt-row { display:flex; align-items:center; gap:0; height:36px; border-bottom:1px solid var(--border); }
+  .gantt-label { width:180px; flex-shrink:0; font-size:12px; padding:0 12px; color:var(--text2); }
+  .gantt-track { flex:1; position:relative; height:100%; }
+  .gantt-bar { position:absolute; height:18px; top:50%; transform:translateY(-50%); border-radius:4px; display:flex; align-items:center; padding:0 8px; font-size:10px; color:#fff; font-weight:600; white-space:nowrap; overflow:hidden; }
+
+  /* ── TIMELINE ── */
+  .timeline { position:relative; padding-left:24px; }
+  .timeline::before { content:''; position:absolute; left:7px; top:0; bottom:0; width:2px; background:var(--border); }
+  .timeline-item { position:relative; margin-bottom:16px; }
+  .timeline-dot { width:14px; height:14px; border-radius:50%; border:2px solid; position:absolute; left:-21px; top:3px; background:var(--surface); }
+  .timeline-content { background:var(--surface2); border-radius:8px; padding:10px 12px; border:1px solid var(--border); }
+  .timeline-time { font-size:11px; color:var(--text2); margin-bottom:4px; font-family:'JetBrains Mono',monospace; }
+  .timeline-text { font-size:13px; }
+
+  /* ── INVENTORY GRID ── */
+  .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; }
+  .product-card { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; }
+  .product-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+  .product-thumb { width:100%; height:80px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:32px; margin-bottom:10px; }
+  .product-name { font-size:13px; font-weight:600; margin-bottom:4px; }
+  .product-sku { font-size:11px; color:var(--text2); font-family:'JetBrains Mono',monospace; }
+  .product-stock { margin-top:8px; }
+  .product-price { font-size:14px; font-weight:700; color:var(--accent3); margin-top:6px; }
+
+  /* ── KANBAN ── */
+  .kanban { display:flex; gap:14px; overflow-x:auto; padding-bottom:8px; }
+  .kanban-col { flex-shrink:0; width:240px; background:var(--surface2); border-radius:12px; padding:14px; border:1px solid var(--border); }
+  .kanban-col-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .kanban-col-title { font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; }
+  .kanban-count { background:var(--border); color:var(--text2); font-size:11px; padding:1px 7px; border-radius:10px; }
+  .kanban-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; cursor:pointer; transition:all .15s; }
+  .kanban-card:hover { border-color:var(--accent); }
+  .kanban-card-title { font-size:13px; font-weight:500; margin-bottom:6px; }
+  .kanban-card-meta { display:flex; align-items:center; justify-content:space-between; }
+  .kanban-card-amount { font-size:12px; color:var(--accent3); font-weight:600; }
+
+  /* ── NOTIFICATION DOT ── */
+  .notif-dot { width:8px; height:8px; background:var(--accent5); border-radius:50%; }
+
+  /* ── EMAIL / SMS MODULE ── */
+  .email-list { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .email-item { display:flex; gap:12px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .12s; }
+  .email-item:hover { background:var(--surface2); }
+  .email-item.unread { background:rgba(79,142,247,.04); }
+  .email-info { flex:1; min-width:0; }
+  .email-from { font-size:13px; font-weight:600; margin-bottom:2px; }
+  .email-subject { font-size:12px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .email-time { font-size:11px; color:var(--text3); flex-shrink:0; }
+
+  /* ── API MODULE ── */
+  .api-endpoint { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:14px; margin-bottom:10px; }
+  .api-method { display:inline-flex; padding:2px 8px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; margin-right:10px; }
+  .method-get { background:rgba(0,200,122,.2); color:var(--success); }
+  .method-post { background:rgba(79,142,247,.2); color:var(--accent); }
+  .method-put { background:rgba(247,201,72,.2); color:var(--warning); }
+  .method-delete { background:rgba(247,79,90,.2); color:var(--danger); }
+  .api-path { font-family:'JetBrains Mono',monospace; font-size:13px; }
+  .api-desc { font-size:12px; color:var(--text2); margin-top:6px; }
+
+  /* ── BANK ── */
+  .bank-card {
+    border-radius:14px; padding:24px; position:relative; overflow:hidden; color:#fff;
+    margin-bottom:16px;
+  }
+  .bank-card-bg1 { background:linear-gradient(135deg,#1e3a8a,#3b82f6); }
+  .bank-card-bg2 { background:linear-gradient(135deg,#1a1a2e,#7c5cfc); }
+  .bank-card-number { font-family:'JetBrains Mono',monospace; font-size:14px; letter-spacing:.15em; margin:16px 0 8px; opacity:.8; }
+  .bank-card-balance { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; }
+  .bank-card-label { font-size:11px; opacity:.6; margin-bottom:4px; }
+
+  /* ── MISC ── */
+  .section-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  .color-dot { width:10px; height:10px; border-radius:50%; }
+  .flex { display:flex; }
+  .flex-center { display:flex; align-items:center; }
+  .gap-8 { gap:8px; }
+  .gap-12 { gap:12px; }
+  .gap-16 { gap:16px; }
+  .mt-16 { margin-top:16px; }
+  .mt-20 { margin-top:20px; }
+  .mb-16 { margin-bottom:16px; }
+  .text-muted { color:var(--text2); font-size:12px; }
+  .fw-600 { font-weight:600; }
+  .mono { font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .accent { color:var(--accent); }
+  .text-success { color:var(--success); }
+  .text-danger { color:var(--danger); }
+  .text-warning { color:var(--warning); }
+  .text-right { text-align:right; }
+  .divider { height:1px; background:var(--border); margin:16px 0; }
+  .empty-state { text-align:center; padding:48px 24px; color:var(--text2); }
+  .empty-state .empty-icon { font-size:48px; margin-bottom:12px; }
+  .empty-state p { font-size:14px; }
+
+  .chip {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 10px; background:var(--surface2); border:1px solid var(--border);
+    border-radius:20px; font-size:12px;
+  }
+
+  .notification-popup {
+    position:fixed; top:80px; right:24px; width:320px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    box-shadow:0 20px 60px rgba(0,0,0,.5); z-index:300; display:none;
+    animation:modalIn .2s ease;
+  }
+  .notification-popup.open { display:block; }
+  .notif-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .notif-list { max-height:300px; overflow-y:auto; }
+  .notif-item { padding:12px 16px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .12s; }
+  .notif-item:hover { background:var(--surface2); }
+  .notif-item-title { font-size:13px; font-weight:500; margin-bottom:2px; }
+  .notif-item-text { font-size:12px; color:var(--text2); }
+  .notif-item-time { font-size:11px; color:var(--text3); margin-top:4px; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">D</div>
+    <div>
+      <div class="logo-text">Dolibarr</div>
+      <div class="logo-sub">ERP / CRM</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="showModule('dashboard')">
+      <span class="nav-icon">🏠</span> Dashboard
+    </div>
+    <div class="nav-section">Módulos</div>
+    <div class="nav-item" onclick="showModule('terceros')">
+      <span class="nav-icon">👥</span> Terceros
+    </div>
+    <div class="nav-item" onclick="showModule('facturacion')">
+      <span class="nav-icon">🧾</span> Facturación
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-item" onclick="showModule('propuestas')">
+      <span class="nav-icon">📋</span> Propuestas Comerciales
+    </div>
+    <div class="nav-item" onclick="showModule('proyectos')">
+      <span class="nav-icon">📊</span> Proyectos y Tareas
+    </div>
+    <div class="nav-item" onclick="showModule('inventario')">
+      <span class="nav-icon">📦</span> Inventario
+    </div>
+    <div class="nav-item" onclick="showModule('contabilidad')">
+      <span class="nav-icon">📒</span> Contabilidad
+    </div>
+    <div class="nav-item" onclick="showModule('rrhh')">
+      <span class="nav-icon">🧑‍💼</span> Recursos Humanos
+    </div>
+    <div class="nav-item" onclick="showModule('ecommerce')">
+      <span class="nav-icon">🛒</span> E-Commerce
+    </div>
+    <div class="nav-item" onclick="showModule('notificaciones')">
+      <span class="nav-icon">🔔</span> Notificaciones
+      <span class="nav-badge">5</span>
+    </div>
+    <div class="nav-item" onclick="showModule('api')">
+      <span class="nav-icon">⚡</span> API REST
+    </div>
+    <div class="nav-item" onclick="showModule('banco')">
+      <span class="nav-icon">🏦</span> Banco y Cajas
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">JP</div>
+      <div>
+        <div class="user-name">Jose Muiguel Perez</div>
+        <div class="user-role">Administrador</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<main class="main">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-title" id="pageTitle">Dashboard <span>Resumen general del sistema</span></div>
+    <div class="header-actions">
+      <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" placeholder="Buscar en el sistema...">
+      </div>
+      <div class="icon-btn" onclick="toggleNotif()" title="Notificaciones" style="position:relative;">
+        🔔
+        <span style="position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--accent5);border-radius:50%;border:1px solid var(--surface);"></span>
+      </div>
+      <div class="icon-btn" title="Configuración">⚙️</div>
+    </div>
+  </header>
+
+  <!-- NOTIFICATION POPUP -->
+  <div class="notification-popup" id="notifPopup">
+    <div class="notif-header">
+      <span style="font-weight:600;font-size:14px;">Notificaciones</span>
+      <span style="font-size:11px;color:var(--accent);cursor:pointer;">Marcar todo como leído</span>
+    </div>
+    <div class="notif-list">
+      <div class="notif-item"><div class="notif-item-title">⚠️ Factura vencida</div><div class="notif-item-text">Empresa ABC — Bs. 12,500 vencida hace 7 días</div><div class="notif-item-time">Hace 2h</div></div>
+      <div class="notif-item"><div class="notif-item-title">✅ Pedido confirmado</div><div class="notif-item-text">Propuesta #PRO-045 aceptada por Industrias Sur</div><div class="notif-item-time">Hace 4h</div></div>
+      <div class="notif-item"><div class="notif-item-title">📦 Stock bajo</div><div class="notif-item-text">Laptop HP — Sólo 2 unidades en almacén</div><div class="notif-item-time">Hace 6h</div></div>
+      <div class="notif-item"><div class="notif-item-title">👤 Nueva tarea asignada</div><div class="notif-item-text">Implementación módulo RRHH — vence viernes</div><div class="notif-item-time">Ayer</div></div>
+      <div class="notif-item"><div class="notif-item-title">💰 Pago recibido</div><div class="notif-item-text">Importaciones Norte — Bs. 8,200 acreditado</div><div class="notif-item-time">Ayer</div></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══════════ 0. DASHBOARD ═══════════ -->
+    <div class="module-page active" id="page-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--kpi-color:var(--accent)">
+          <div class="kpi-label">Ingresos del Mes</div>
+          <div class="kpi-value">Bs. 284,500</div>
+          <div class="kpi-change">▲ 12.4% vs mes anterior</div>
+          <div class="kpi-icon">💰</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--accent3)">
+          <div class="kpi-label">Clientes Activos</div>
+          <div class="kpi-value">1,247</div>
+          <div class="kpi-change">▲ 38 nuevos este mes</div>
+          <div class="kpi-icon">👥</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--accent2)">
+          <div class="kpi-label">Facturas Pendientes</div>
+          <div class="kpi-value">23</div>
+          <div class="kpi-change down">▼ 3 vencidas hoy</div>
+          <div class="kpi-icon">🧾</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--accent4)">
+          <div class="kpi-label">Proyectos Activos</div>
+          <div class="kpi-value">8</div>
+          <div class="kpi-change">▲ 2 iniciados esta semana</div>
+          <div class="kpi-icon">📊</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Gráfico de ventas mensuales -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Ventas Mensuales 2026</div><div class="card-subtitle">Facturación en bolivianos</div></div>
+            <span class="badge badge-success">↑ 12%</span>
+          </div>
+          <div class="chart-bars" id="salesChart"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;" id="salesLabels"></div>
+        </div>
+
+        <!-- Actividad reciente -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Actividad Reciente</div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--success)"></div><div class="activity-content"><div class="activity-title">Factura FAC-2026-089 pagada — Importaciones Norte</div><div class="activity-time">Hace 15 min</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--accent)"></div><div class="activity-content"><div class="activity-title">Nueva propuesta PRO-046 enviada a TechBolivia S.R.L.</div><div class="activity-time">Hace 1h</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--warning)"></div><div class="activity-content"><div class="activity-title">Stock bajo: Teclado Mecánico — 3 unidades restantes</div><div class="activity-time">Hace 2h</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--accent2)"></div><div class="activity-content"><div class="activity-title">Empleado María Quispe registró 8h en Proyecto ERP</div><div class="activity-time">Hace 3h</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--accent3)"></div><div class="activity-content"><div class="activity-title">Pedido WooCommerce #1024 importado automáticamente</div><div class="activity-time">Hace 4h</div></div></div>
+        </div>
+      </div>
+
+      <div class="grid-3 mt-16">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Estado de Facturas</div></div>
+          <div class="stat-row"><span class="stat-label"><span class="color-dot" style="background:var(--success)"></span>Pagadas</span><span class="stat-val text-success">67</span></div>
+          <div class="stat-row"><span class="stat-label"><span class="color-dot" style="background:var(--warning)"></span>Pendientes</span><span class="stat-val text-warning">20</span></div>
+          <div class="stat-row"><span class="stat-label"><span class="color-dot" style="background:var(--danger)"></span>Vencidas</span><span class="stat-val text-danger">3</span></div>
+          <div class="stat-row"><span class="stat-label"><span class="color-dot" style="background:var(--text3)"></span>Borradores</span><span class="stat-val">11</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Top Módulos Usados</div></div>
+          <div class="stat-row"><span class="stat-label">🧾 Facturación</span><span class="stat-val">342 accesos</span></div>
+          <div class="stat-row"><span class="stat-label">👥 Terceros</span><span class="stat-val">218 accesos</span></div>
+          <div class="stat-row"><span class="stat-label">📦 Inventario</span><span class="stat-val">187 accesos</span></div>
+          <div class="stat-row"><span class="stat-label">📊 Proyectos</span><span class="stat-val">94 accesos</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Resumen Bancario</div></div>
+          <div class="stat-row"><span class="stat-label">Cuenta Principal BNB</span><span class="stat-val">Bs. 128,450</span></div>
+          <div class="stat-row"><span class="stat-label">Cuenta USD BCB</span><span class="stat-val">$ 18,200</span></div>
+          <div class="stat-row"><span class="stat-label">Caja Chica Sucre</span><span class="stat-val">Bs. 2,800</span></div>
+          <div class="stat-row"><span class="stat-label">Total Disponible</span><span class="stat-val text-success fw-600">Bs. 256,050</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ 1. TERCEROS ═══════════ -->
+    <div class="module-page" id="page-terceros">
+      <div class="flex-center gap-16 mb-16" style="justify-content:space-between;flex-wrap:wrap;">
+        <div class="tabs" style="margin-bottom:0;border-bottom:none;">
+          <button class="tab-btn active" onclick="filterTercero(this,'todos')">Todos (48)</button>
+          <button class="tab-btn" onclick="filterTercero(this,'cliente')">Clientes (32)</button>
+          <button class="tab-btn" onclick="filterTercero(this,'proveedor')">Proveedores (12)</button>
+          <button class="tab-btn" onclick="filterTercero(this,'prospecto')">Prospectos (4)</button>
+        </div>
+        <div class="flex gap-8">
+          <div class="search-bar"><span>🔍</span><input type="text" placeholder="Buscar tercero..."></div>
+          <button class="btn btn-primary" onclick="openModal('modalTercero')">+ Nuevo Tercero</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="terceroTable">
+          <thead><tr>
+            <th>Razón Social</th><th>Tipo</th><th>NIT/CI</th><th>Ciudad</th><th>Email</th><th>Teléfono</th><th>Estado</th><th>Acciones</th>
+          </tr></thead>
+          <tbody id="terceroBody">
+            <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,#4f8ef7,#7c5cfc);color:#fff">IM</div>Importaciones Norte S.R.L.</div></td><td><span class="badge badge-info">Cliente</span></td><td class="mono">1023456789</td><td>Sucre</td><td>info@inorte.bo</td><td>4-6234567</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+            <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,#00d4aa,#4f8ef7);color:#fff">TB</div>TechBolivia S.R.L.</div></td><td><span class="badge badge-info">Cliente</span><span class="badge badge-warning" style="margin-left:4px">Prospecto</span></td><td class="mono">2034567890</td><td>La Paz</td><td>ventas@techbo.com</td><td>2-2456789</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+            <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,#f7934f,#f74f7a);color:#fff">DS</div>Distribuidora Sur S.A.</div></td><td><span class="badge badge-purple">Proveedor</span></td><td class="mono">3045678901</td><td>Potosí</td><td>compras@dissur.bo</td><td>2-6234891</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+            <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,#f7c948,#f7934f);color:#fff">AG</div>Agro Chuquisaca Ltda.</div></td><td><span class="badge badge-info">Cliente</span></td><td class="mono">4056789012</td><td>Sucre</td><td>gerencia@agrochu.bo</td><td>4-6455678</td><td><span class="badge badge-warning">Inactivo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+            <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,#7c5cfc,#f74f7a);color:#fff">MC</div>Minera Cordillera S.A.</div></td><td><span class="badge badge-purple">Proveedor</span></td><td class="mono">5067890123</td><td>Oruro</td><td>admin@minecord.bo</td><td>2-5267890</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+            <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,#00d4aa,#00c87a);color:#fff">CF</div>Constructora Futura SRL</div></td><td><span class="badge badge-teal">Prospecto</span></td><td class="mono">6078901234</td><td>Cochabamba</td><td>licitacion@cfutura.bo</td><td>4-4234567</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ 2. FACTURACIÓN ═══════════ -->
+    <div class="module-page" id="page-facturacion">
+      <div class="flex-center gap-16 mb-16" style="justify-content:space-between;flex-wrap:wrap;">
+        <div class="flex gap-8">
+          <div class="search-bar"><span>🔍</span><input type="text" placeholder="Buscar factura..."></div>
+          <select class="form-select" style="width:140px;height:36px;padding:0 10px">
+            <option>Todos los estados</option><option>Pagadas</option><option>Pendientes</option><option>Vencidas</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modalFactura')">+ Nueva Factura</button>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+        <div class="kpi-card" style="--kpi-color:var(--success)"><div class="kpi-label">Cobrado este mes</div><div class="kpi-value" style="font-size:20px">Bs. 142,800</div></div>
+        <div class="kpi-card" style="--kpi-color:var(--warning)"><div class="kpi-label">Por cobrar</div><div class="kpi-value" style="font-size:20px">Bs. 68,500</div></div>
+        <div class="kpi-card" style="--kpi-color:var(--danger)"><div class="kpi-label">Vencidas</div><div class="kpi-value" style="font-size:20px">Bs. 12,200</div></div>
+        <div class="kpi-card" style="--kpi-color:var(--text3)"><div class="kpi-label">Borradores</div><div class="kpi-value" style="font-size:20px">Bs. 34,100</div></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>N° Factura</th><th>Cliente</th><th>Fecha</th><th>Vencimiento</th><th>Monto</th><th>IVA</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            <tr><td class="mono accent">FAC-2026-089</td><td>Importaciones Norte</td><td>15/05/2026</td><td>15/06/2026</td><td>Bs. 10,690</td><td>Bs. 1,390</td><td class="fw-600">Bs. 12,080</td><td><span class="badge badge-success">Pagada</span></td><td><button class="btn btn-secondary btn-xs" onclick="openModal('modalVerFactura')">Ver PDF</button></td></tr>
+            <tr><td class="mono accent">FAC-2026-088</td><td>TechBolivia S.R.L.</td><td>10/05/2026</td><td>10/06/2026</td><td>Bs. 22,000</td><td>Bs. 2,860</td><td class="fw-600">Bs. 24,860</td><td><span class="badge badge-warning">Pendiente</span></td><td><button class="btn btn-secondary btn-xs" onclick="openModal('modalVerFactura')">Ver PDF</button></td></tr>
+            <tr><td class="mono accent">FAC-2026-085</td><td>Agro Chuquisaca</td><td>01/05/2026</td><td>01/06/2026</td><td>Bs. 8,500</td><td>Bs. 1,105</td><td class="fw-600">Bs. 9,605</td><td><span class="badge badge-danger">Vencida</span></td><td><button class="btn btn-secondary btn-xs" onclick="openModal('modalVerFactura')">Ver PDF</button></td></tr>
+            <tr><td class="mono accent">FAC-2026-082</td><td>Minera Cordillera</td><td>28/04/2026</td><td>28/05/2026</td><td>Bs. 45,000</td><td>Bs. 5,850</td><td class="fw-600">Bs. 50,850</td><td><span class="badge badge-success">Pagada</span></td><td><button class="btn btn-secondary btn-xs" onclick="openModal('modalVerFactura')">Ver PDF</button></td></tr>
+            <tr><td class="mono accent">FAC-2026-079</td><td>Constructora Futura</td><td>20/04/2026</td><td>20/05/2026</td><td>Bs. 15,200</td><td>Bs. 1,976</td><td class="fw-600">Bs. 17,176</td><td><span class="badge badge-warning">Pendiente</span></td><td><button class="btn btn-secondary btn-xs" onclick="openModal('modalVerFactura')">Ver PDF</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ 3. PROPUESTAS ═══════════ -->
+    <div class="module-page" id="page-propuestas">
+      <div class="flex-center mb-16" style="justify-content:space-between;">
+        <div class="tabs" style="margin-bottom:0;border-bottom:none;">
+          <button class="tab-btn active">Kanban</button>
+          <button class="tab-btn">Lista</button>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modalPropuesta')">+ Nueva Propuesta</button>
+      </div>
+
+      <div class="kanban">
+        <div class="kanban-col">
+          <div class="kanban-col-header"><span class="kanban-col-title"><span style="color:var(--text2)">●</span> Borrador</span><span class="kanban-count">3</span></div>
+          <div class="kanban-card"><div class="kanban-card-title">Sistema de facturación — TechBolivia</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 18,500</span><span class="text-muted">PRO-046</span></div><div style="margin-top:8px"><span class="badge badge-info" style="font-size:10px">Servicios</span></div></div>
+          <div class="kanban-card"><div class="kanban-card-title">Consultoría ERP — Agro Quispe</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 6,200</span><span class="text-muted">PRO-047</span></div><div style="margin-top:8px"><span class="badge badge-purple" style="font-size:10px">Mixto</span></div></div>
+          <div class="kanban-card"><div class="kanban-card-title">Hardware — Universidad USFX</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 34,800</span><span class="text-muted">PRO-048</span></div><div style="margin-top:8px"><span class="badge badge-orange" style="font-size:10px">Producto</span></div></div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-header"><span class="kanban-col-title"><span style="color:var(--accent)">●</span> Enviada</span><span class="kanban-count">2</span></div>
+          <div class="kanban-card"><div class="kanban-card-title">Módulo RRHH — Minera Cord.</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 12,000</span><span class="text-muted">PRO-043</span></div><div style="margin-top:8px"><span class="badge badge-info" style="font-size:10px">Servicios</span></div><div style="margin-top:6px;font-size:11px;color:var(--text2)">⏳ Vence: 10 jun</div></div>
+          <div class="kanban-card"><div class="kanban-card-title">Servidores NAS — Importaciones N.</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 28,750</span><span class="text-muted">PRO-044</span></div><div style="margin-top:8px"><span class="badge badge-orange" style="font-size:10px">Producto</span></div></div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-header"><span class="kanban-col-title"><span style="color:var(--success)">●</span> Aceptada</span><span class="kanban-count">2</span></div>
+          <div class="kanban-card"><div class="kanban-card-title">Implementación Dolibarr — Dist. Sur</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 42,000</span><span class="text-muted">PRO-041</span></div><div style="margin-top:8px"><span class="badge badge-success" style="font-size:10px">✓ Aceptada</span></div><button class="btn btn-primary btn-xs" style="margin-top:8px;width:100%" onclick="alert('Propuesta convertida a Factura FAC-2026-090 ✅')">Convertir a Factura</button></div>
+          <div class="kanban-card"><div class="kanban-card-title">Soporte anual — Constructora F.</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 9,600</span><span class="text-muted">PRO-045</span></div><div style="margin-top:8px"><span class="badge badge-success" style="font-size:10px">✓ Aceptada</span></div></div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-header"><span class="kanban-col-title"><span style="color:var(--accent2)">●</span> Facturada</span><span class="kanban-count">4</span></div>
+          <div class="kanban-card" style="opacity:.6"><div class="kanban-card-title">Redes LAN — TechBolivia</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 15,200</span><span class="text-muted">PRO-038</span></div><div style="margin-top:8px"><span class="badge badge-purple" style="font-size:10px">Facturada</span></div></div>
+          <div class="kanban-card" style="opacity:.6"><div class="kanban-card-title">Capacitación usuarios — Agro</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 3,500</span><span class="text-muted">PRO-036</span></div><div style="margin-top:8px"><span class="badge badge-purple" style="font-size:10px">Facturada</span></div></div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-header"><span class="kanban-col-title"><span style="color:var(--danger)">●</span> Rechazada</span><span class="kanban-count">1</span></div>
+          <div class="kanban-card" style="opacity:.5"><div class="kanban-card-title">Licencias Office — Empresa X</div><div class="kanban-card-meta"><span class="kanban-card-amount">Bs. 7,800</span><span class="text-muted">PRO-040</span></div><div style="margin-top:8px"><span class="badge badge-danger" style="font-size:10px">Rechazada</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ 4. PROYECTOS ═══════════ -->
+    <div class="module-page" id="page-proyectos">
+      <div class="grid-2 mb-16">
+        <div>
+          <div class="section-title">📊 Proyectos Activos</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Proyecto</th><th>Cliente</th><th>Progreso</th><th>Estado</th></tr></thead>
+              <tbody>
+                <tr onclick="showProjectDetail('erp')" style="cursor:pointer">
+                  <td><div class="fw-600">Implementación ERP</div><div class="text-muted">PRJ-001</div></td>
+                  <td>Importaciones Norte</td>
+                  <td><div class="progress-bar" style="width:120px"><div class="progress-fill" style="width:65%;background:var(--accent)"></div></div><div class="text-muted" style="font-size:11px;margin-top:2px">65%</div></td>
+                  <td><span class="badge badge-info">En curso</span></td>
+                </tr>
+                <tr onclick="showProjectDetail('web')" style="cursor:pointer">
+                  <td><div class="fw-600">Portal Web Corporativo</div><div class="text-muted">PRJ-002</div></td>
+                  <td>TechBolivia</td>
+                  <td><div class="progress-bar" style="width:120px"><div class="progress-fill" style="width:40%;background:var(--accent2)"></div></div><div class="text-muted" style="font-size:11px;margin-top:2px">40%</div></td>
+                  <td><span class="badge badge-warning">Retrasado</span></td>
+                </tr>
+                <tr>
+                  <td><div class="fw-600">Auditoría IT</div><div class="text-muted">PRJ-003</div></td>
+                  <td>Minera Cordillera</td>
+                  <td><div class="progress-bar" style="width:120px"><div class="progress-fill" style="width:90%;background:var(--success)"></div></div><div class="text-muted" style="font-size:11px;margin-top:2px">90%</div></td>
+                  <td><span class="badge badge-success">Finalizando</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Diagrama de Gantt — PRJ-001</div><span class="badge badge-info">Implementación ERP</span></div>
+          <div style="overflow-x:auto">
+            <div style="min-width:460px">
+              <div style="display:flex;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px">
+                <div style="width:180px"></div>
+                <div style="flex:1;display:flex;justify-content:space-between;font-size:10px;color:var(--text2);padding:0 4px">
+                  <span>Ene</span><span>Feb</span><span>Mar</span><span>Abr</span><span>May</span><span>Jun</span>
+                </div>
+              </div>
+              <div class="gantt-row"><div class="gantt-label">Análisis</div><div class="gantt-track"><div class="gantt-bar" style="left:0%;width:25%;background:var(--success)">✓ Completado</div></div></div>
+              <div class="gantt-row"><div class="gantt-label">Instalación</div><div class="gantt-track"><div class="gantt-bar" style="left:22%;width:20%;background:var(--success)">✓ Hecho</div></div></div>
+              <div class="gantt-row"><div class="gantt-label">Configuración</div><div class="gantt-track"><div class="gantt-bar" style="left:38%;width:25%;background:var(--accent)">En curso</div></div></div>
+              <div class="gantt-row"><div class="gantt-label">Capacitación</div><div class="gantt-track"><div class="gantt-bar" style="left:55%;width:20%;background:var(--accent2)">Próximo</div></div></div>
+              <div class="gantt-row"><div class="gantt-label">Go-Live</div><div class="gantt-track"><div class="gantt-bar" style="left:72%;width:15%;background:var(--accent4)">Pendiente</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Tareas del Proyecto — Implementación ERP</div><button class="btn btn-secondary btn-sm" onclick="openModal('modalTarea')">+ Nueva Tarea</button></div>
+        <div class="table-wrap" style="border:none">
+          <table>
+            <thead><tr><th>Tarea</th><th>Asignado a</th><th>Inicio</th><th>Fin</th><th>Horas</th><th>Prioridad</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>Levantamiento de requerimientos</td><td><div class="flex-center gap-8"><div class="avatar" style="background:var(--accent);color:#fff;font-size:10px">LY</div>Luis Yucra</div></td><td>10/01</td><td>20/01</td><td>40h</td><td><span class="badge badge-danger">Alta</span></td><td><span class="badge badge-success">Completa</span></td></tr>
+              <tr><td>Instalación servidor Linux</td><td><div class="flex-center gap-8"><div class="avatar" style="background:var(--accent2);color:#fff;font-size:10px">MQ</div>María Quispe</div></td><td>21/01</td><td>28/01</td><td>24h</td><td><span class="badge badge-warning">Media</span></td><td><span class="badge badge-success">Completa</span></td></tr>
+              <tr><td>Configuración módulos ERP</td><td><div class="flex-center gap-8"><div class="avatar" style="background:var(--accent3);color:var(--bg);font-size:10px">JM</div>Juan Mamani</div></td><td>01/03</td><td>31/05</td><td>80h</td><td><span class="badge badge-danger">Alta</span></td><td><span class="badge badge-info">En curso</span></td></tr>
+              <tr><td>Migración de datos</td><td><div class="flex-center gap-8"><div class="avatar" style="background:var(--accent4);color:#fff;font-size:10px">AP</div>Ana Prado</div></td><td>15/05</td><td>30/05</td><td>32h</td><td><span class="badge badge-warning">Media</span></td><td><span class="badge badge-warning">Pendiente</span></td></tr>
+              <tr><td>Capacitación usuarios finales</td><td><div class="flex-center gap-8"><div class="avatar" style="background:var(--accent5);color:#fff;font-size:10px">LY</div>Luis Yucra</div></td><td>01/06</td><td>15/06</td><td>48h</td><td><span class="badge badge-info">Normal</span></td><td><span class="badge badge-teal">Planificada</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ 5. INVENTARIO ═══════════ -->
+    <div class="module-page" id="page-inventario">
+      <div class="flex-center mb-16" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div class="flex gap-8">
+          <div class="search-bar"><span>🔍</span><input type="text" placeholder="Buscar producto..."></div>
+          <select class="form-select" style="width:140px;height:36px;padding:0 10px"><option>Todos</option><option>Stock bajo</option><option>Sin stock</option></select>
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-secondary" onclick="toggleInvView()">⊞ Vista</button>
+          <button class="btn btn-primary" onclick="openModal('modalProducto')">+ Nuevo Producto</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid" style="margin-bottom:20px">
+        <div class="kpi-card" style="--kpi-color:var(--accent3)"><div class="kpi-label">Total Productos</div><div class="kpi-value" style="font-size:22px">284</div></div>
+        <div class="kpi-card" style="--kpi-color:var(--warning)"><div class="kpi-label">Stock bajo</div><div class="kpi-value" style="font-size:22px">12</div></div>
+        <div class="kpi-card" style="--kpi-color:var(--danger)"><div class="kpi-label">Sin stock</div><div class="kpi-value" style="font-size:22px">3</div></div>
+        <div class="kpi-card" style="--kpi-color:var(--accent2)"><div class="kpi-label">Valor total stock</div><div class="kpi-value" style="font-size:22px">Bs. 1.2M</div></div>
+      </div>
+
+      <div id="invGrid" class="product-grid">
+        <div class="product-card" onclick="openModal('modalProductoVer')"><div class="product-thumb" style="background:rgba(79,142,247,.1)">💻</div><div class="product-name">Laptop HP ProBook 450</div><div class="product-sku">SKU: LPT-HP-450</div><div class="product-stock"><div class="flex-center gap-8" style="margin-bottom:4px"><span class="text-muted" style="font-size:11px">Stock físico:</span><span class="fw-600 text-success">24 uds</span></div><div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--success)"></div></div></div><div class="product-price">Bs. 8,450</div></div>
+        <div class="product-card" onclick="openModal('modalProductoVer')"><div class="product-thumb" style="background:rgba(0,212,170,.1)">🖥️</div><div class="product-name">Monitor LG 27" 4K</div><div class="product-sku">SKU: MON-LG-27</div><div class="product-stock"><div class="flex-center gap-8" style="margin-bottom:4px"><span class="text-muted" style="font-size:11px">Stock físico:</span><span class="fw-600 text-warning">3 uds</span></div><div class="progress-bar"><div class="progress-fill" style="width:15%;background:var(--warning)"></div></div></div><div class="product-price">Bs. 3,200</div></div>
+        <div class="product-card" onclick="openModal('modalProductoVer')"><div class="product-thumb" style="background:rgba(247,147,79,.1)">⌨️</div><div class="product-name">Teclado Mecánico RGB</div><div class="product-sku">SKU: TEC-MEC-RGB</div><div class="product-stock"><div class="flex-center gap-8" style="margin-bottom:4px"><span class="text-muted" style="font-size:11px">Stock físico:</span><span class="fw-600 text-danger">0 uds</span></div><div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--danger)"></div></div></div><div class="product-price">Bs. 680</div></div>
+        <div class="product-card" onclick="openModal('modalProductoVer')"><div class="product-thumb" style="background:rgba(124,92,252,.1)">🖨️</div><div class="product-name">Impresora Epson L3250</div><div class="product-sku">SKU: IMP-EPS-L3250</div><div class="product-stock"><div class="flex-center gap-8" style="margin-bottom:4px"><span class="text-muted" style="font-size:11px">Stock físico:</span><span class="fw-600 text-success">15 uds</span></div><div class="progress-bar"><div class="progress-fill" style="width:60%;background:var(--success)"></div></div></div><div class="product-price">Bs. 1,850</div></div>
+        <div class="product-card" onclick="openModal('modalProductoVer')"><div class="product-thumb" style="background:rgba(247,79,122,.1)">🖱️</div><div class="product-name">Mouse Logitech G305</div><div class="product-sku">SKU: MOU-LOG-G305</div><div class="product-stock"><div class="flex-center gap-8" style="margin-bottom:4px"><span class="text-muted" style="font-size:11px">Stock físico:</span><span class="fw-600 text-success">48 uds</span></div><div class="progress-bar"><div class="progress-fill" style="width:95%;background:var(--accent3)"></div></div></div><div class="product-price">Bs. 420</div></div>
+        <div class="product-card" onclick="openModal('modalProductoVer')"><div class="product-thumb" style="background:rgba(0,200,122,.1)">📱</div><div class="product-name">Tablet Samsung Tab S7</div><div class="product-sku">SKU: TAB-SAM-S7</div><div class="product-stock"><div class="flex-center gap-8" style="margin-bottom:4px"><span class="text-muted" style="font-size:11px">Stock físico:</span><span class="fw-600 text-warning">5 uds</span></div><div class="progress-bar"><div class="progress-fill" style="width:25%;background:var(--warning)"></div></div></div><div class="product-price">Bs. 4,750</div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════ 6. CONTABILIDAD ═══════════ -->
+    <div class="module-page" id="page-contabilidad">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(this,'tab-libro')">Libro Mayor</button>
+        <button class="tab-btn" onclick="switchTab(this,'tab-balance')">Balance</button>
+        <button class="tab-btn" onclick="switchTab(this,'tab-conciliacion')">Conciliación Bancaria</button>
+        <button class="tab-btn" onclick="switchTab(this,'tab-iva')">Gestión IVA</button>
+      </div>
+
+      <div id="tab-libro" class="tab-content active">
+        <div class="flex-center mb-16" style="justify-content:space-between;"><div class="card-title">Asientos Contables — Mayo 2026</div><button class="btn btn-secondary btn-sm">📥 Exportar CSV</button></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Fecha</th><th>N° Asiento</th><th>Diario</th><th>Cuenta</th><th>Descripción</th><th class="text-right">Debe (Bs.)</th><th class="text-right">Haber (Bs.)</th></tr></thead>
+            <tbody>
+              <tr><td>15/05/2026</td><td class="mono">AST-001</td><td><span class="badge badge-info">Ventas</span></td><td class="mono">4100</td><td>Ingreso por venta FAC-089</td><td class="text-right">—</td><td class="text-right text-success fw-600">12,080.00</td></tr>
+              <tr><td>15/05/2026</td><td class="mono">AST-001</td><td><span class="badge badge-info">Ventas</span></td><td class="mono">1100</td><td>Caja — cobro FAC-089</td><td class="text-right fw-600">12,080.00</td><td class="text-right">—</td></tr>
+              <tr><td>14/05/2026</td><td class="mono">AST-002</td><td><span class="badge badge-purple">Compras</span></td><td class="mono">5100</td><td>Compra materiales — Dist. Sur</td><td class="text-right fw-600">8,500.00</td><td class="text-right">—</td></tr>
+              <tr><td>14/05/2026</td><td class="mono">AST-002</td><td><span class="badge badge-purple">Compras</span></td><td class="mono">2100</td><td>Cuentas por pagar proveedor</td><td class="text-right">—</td><td class="text-right text-danger fw-600">8,500.00</td></tr>
+              <tr><td>13/05/2026</td><td class="mono">AST-003</td><td><span class="badge badge-teal">Banco</span></td><td class="mono">1110</td><td>Depósito BNB — Minera Cord.</td><td class="text-right fw-600">50,850.00</td><td class="text-right">—</td></tr>
+              <tr><td>13/05/2026</td><td class="mono">AST-003</td><td><span class="badge badge-teal">Banco</span></td><td class="mono">1200</td><td>Clientes — cobro FAC-082</td><td class="text-right">—</td><td class="text-right text-success fw-600">50,850.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-balance" class="tab-content">
+        <div class="grid-2">
+          <div class="card"><div class="card-header"><div class="card-title">ACTIVOS</div><span class="fw-600 text-success">Bs. 845,200</span></div>
+            <div class="stat-row"><span class="stat-label mono">1100 - Caja</span><span class="stat-val">Bs. 2,800</span></div>
+            <div class="stat-row"><span class="stat-label mono">1110 - Banco BNB</span><span class="stat-val">Bs. 128,450</span></div>
+            <div class="stat-row"><span class="stat-label mono">1200 - Clientes</span><span class="stat-val">Bs. 80,700</span></div>
+            <div class="stat-row"><span class="stat-label mono">1300 - Inventario</span><span class="stat-val">Bs. 320,000</span></div>
+            <div class="stat-row"><span class="stat-label mono">1500 - Activos Fijos</span><span class="stat-val">Bs. 313,250</span></div>
+          </div>
+          <div class="card"><div class="card-header"><div class="card-title">PASIVOS + PATRIMONIO</div><span class="fw-600 text-danger">Bs. 845,200</span></div>
+            <div class="stat-row"><span class="stat-label mono">2100 - Proveedores</span><span class="stat-val">Bs. 45,000</span></div>
+            <div class="stat-row"><span class="stat-label mono">2200 - Préstamos</span><span class="stat-val">Bs. 120,000</span></div>
+            <div class="stat-row"><span class="stat-label mono">2300 - IVA por pagar</span><span class="stat-val">Bs. 8,200</span></div>
+            <div class="stat-row"><span class="stat-label mono">3000 - Capital Social</span><span class="stat-val">Bs. 500,000</span></div>
+            <div class="stat-row"><span class="stat-label mono">3100 - Utilidades</span><span class="stat-val">Bs. 172,000</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-conciliacion" class="tab-content">
+        <div class="flex-center mb-16" style="justify-content:space-between">
+          <div class="card-title">Cuenta BNB — Mayo 2026</div>
+          <button class="btn btn-secondary btn-sm">📤 Importar OFX/CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Fecha</th><th>Concepto extracto</th><th>Monto extracto</th><th>Registro Dolibarr</th><th>Diferencia</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>15/05</td><td>CRÉDITO — Minera Cordillera</td><td class="text-success fw-600">+50,850</td><td>FAC-082 cobrada</td><td class="text-success">0.00</td><td><span class="badge badge-success">✓ Conciliado</span></td></tr>
+              <tr><td>14/05</td><td>DÉBITO — Proveedor Dist. Sur</td><td class="text-danger fw-600">-8,500</td><td>PO-2026-034</td><td class="text-success">0.00</td><td><span class="badge badge-success">✓ Conciliado</span></td></tr>
+              <tr><td>13/05</td><td>DÉBITO — Comisión bancaria</td><td class="text-danger fw-600">-85</td><td>—</td><td class="text-warning fw-600">-85.00</td><td><span class="badge badge-warning">⚠ Pendiente</span></td></tr>
+              <tr><td>12/05</td><td>CRÉDITO — Importaciones Norte</td><td class="text-success fw-600">+12,080</td><td>FAC-089 cobrada</td><td class="text-success">0.00</td><td><span class="badge badge-success">✓ Conciliado</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="flex gap-16 mt-16">
+          <div class="card" style="flex:1"><div class="stat-row"><span class="stat-label">Saldo extracto banco</span><span class="stat-val">Bs. 128,365</span></div><div class="stat-row"><span class="stat-label">Saldo en Dolibarr</span><span class="stat-val">Bs. 128,450</span></div><div class="stat-row"><span class="stat-label fw-600">Diferencia (comisión)</span><span class="stat-val text-warning fw-600">-Bs. 85</span></div></div>
+        </div>
+      </div>
+
+      <div id="tab-iva" class="tab-content">
+        <div class="grid-2">
+          <div class="card"><div class="card-header"><div class="card-title">IVA Repercutido (cobrado)</div></div>
+            <div class="stat-row"><span class="stat-label">IVA en facturas de venta</span><span class="stat-val text-success">Bs. 18,540</span></div>
+            <div class="stat-row"><span class="stat-label">Tasa aplicada</span><span class="stat-val">13%</span></div>
+          </div>
+          <div class="card"><div class="card-header"><div class="card-title">IVA Soportado (pagado)</div></div>
+            <div class="stat-row"><span class="stat-label">IVA en facturas de compra</span><span class="stat-val text-danger">Bs. 7,200</span></div>
+            <div class="stat-row"><span class="stat-label">Tasa aplicada</span><span class="stat-val">13%</span></div>
+          </div>
+        </div>
+        <div class="card mt-16" style="max-width:400px">
+          <div class="card-title mb-16">Obligación Tributaria</div>
+          <div class="stat-row"><span class="stat-label">IVA Repercutido</span><span class="stat-val">Bs. 18,540</span></div>
+          <div class="stat-row"><span class="stat-label">IVA Soportado</span><span class="stat-val">- Bs. 7,200</span></div>
+          <div class="divider"></div>
+          <div class="stat-row"><span class="stat-label fw-600">A pagar al fisco</span><span class="stat-val text-warning fw-600">Bs. 11,340</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ 7. RRHH ═══════════ -->
+    <div class="module-page" id="page-rrhh">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(this,'tab-empleados')">Empleados</button>
+        <button class="tab-btn" onclick="switchTab(this,'tab-ausencias')">Ausencias</button>
+        <button class="tab-btn" onclick="switchTab(this,'tab-nomina')">Nómina</button>
+      </div>
+
+      <div id="tab-empleados" class="tab-content active">
+        <div class="flex-center mb-16" style="justify-content:space-between">
+          <div class="search-bar"><span>🔍</span><input type="text" placeholder="Buscar empleado..."></div>
+          <button class="btn btn-primary" onclick="openModal('modalEmpleado')">+ Nuevo Empleado</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Empleado</th><th>Cargo</th><th>Departamento</th><th>Sueldo Base</th><th>Contrato</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff">LY</div><div><div class="fw-600">Luis Yucra Soria</div><div class="text-muted">lyucra@empresa.bo</div></div></div></td><td>Jefe de Sistemas</td><td>TI</td><td>Bs. 6,500</td><td><span class="badge badge-info">Indefinido</span></td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+              <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,var(--accent3),var(--accent));color:var(--bg)">MQ</div><div><div class="fw-600">María Quispe Choque</div><div class="text-muted">mquispe@empresa.bo</div></div></div></td><td>Analista de Sistemas</td><td>TI</td><td>Bs. 4,800</td><td><span class="badge badge-info">Indefinido</span></td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+              <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,var(--accent4),var(--accent5));color:#fff">AP</div><div><div class="fw-600">Ana Prado Llanos</div><div class="text-muted">aprado@empresa.bo</div></div></div></td><td>Contadora</td><td>Finanzas</td><td>Bs. 5,200</td><td><span class="badge badge-warning">Plazo fijo</span></td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+              <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:linear-gradient(135deg,var(--accent2),#f74f7a);color:#fff">JM</div><div><div class="fw-600">Juan Mamani Torres</div><div class="text-muted">jmamani@empresa.bo</div></div></div></td><td>Técnico Soporte</td><td>TI</td><td>Bs. 3,800</td><td><span class="badge badge-info">Indefinido</span></td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-secondary btn-xs">Ver</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-ausencias" class="tab-content">
+        <div class="flex-center mb-16" style="justify-content:space-between"><div class="card-title">Solicitudes de Ausencia</div><button class="btn btn-primary" onclick="openModal('modalAusencia')">+ Solicitar Ausencia</button></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Empleado</th><th>Tipo</th><th>Desde</th><th>Hasta</th><th>Días</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:var(--accent3);color:var(--bg)">MQ</div>María Quispe</div></td><td><span class="badge badge-info">Vacaciones</span></td><td>01/06/2026</td><td>15/06/2026</td><td>15</td><td><span class="badge badge-warning">Pendiente</span></td><td><div class="flex gap-8"><button class="btn btn-success btn-xs" onclick="approveAbsence(this)">✓ Aprobar</button><button class="btn btn-danger btn-xs">✗ Rechazar</button></div></td></tr>
+              <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:var(--accent4);color:#fff">AP</div>Ana Prado</div></td><td><span class="badge badge-orange">Enfermedad</span></td><td>28/05/2026</td><td>30/05/2026</td><td>3</td><td><span class="badge badge-success">Aprobada</span></td><td></td></tr>
+              <tr><td><div class="flex-center gap-8"><div class="avatar" style="background:var(--accent2);color:#fff">JM</div>Juan Mamani</div></td><td><span class="badge badge-teal">Personal</span></td><td>05/06/2026</td><td>05/06/2026</td><td>1</td><td><span class="badge badge-success">Aprobada</span></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-nomina" class="tab-content">
+        <div class="card-title mb-16">Nómina — Mayo 2026</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Empleado</th><th>Sueldo Base</th><th>Horas Extra</th><th>Descuentos</th><th>AFP</th><th>Neto a Pagar</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>Luis Yucra Soria</td><td>Bs. 6,500</td><td>Bs. 650</td><td>Bs. 325</td><td>Bs. 715</td><td class="fw-600 text-success">Bs. 6,110</td><td><span class="badge badge-success">Pagado</span></td></tr>
+              <tr><td>María Quispe</td><td>Bs. 4,800</td><td>Bs. 0</td><td>Bs. 240</td><td>Bs. 528</td><td class="fw-600 text-success">Bs. 4,032</td><td><span class="badge badge-success">Pagado</span></td></tr>
+              <tr><td>Ana Prado</td><td>Bs. 5,200</td><td>Bs. 260</td><td>Bs. 260</td><td>Bs. 572</td><td class="fw-600 text-success">Bs. 4,628</td><td><span class="badge badge-warning">Pendiente</span></td></tr>
+              <tr><td>Juan Mamani</td><td>Bs. 3,800</td><td>Bs. 190</td><td>Bs. 190</td><td>Bs. 418</td><td class="fw-600 text-success">Bs. 3,382</td><td><span class="badge badge-success">Pagado</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card mt-16" style="max-width:380px">
+          <div class="stat-row"><span class="stat-label">Total bruto</span><span class="stat-val">Bs. 22,400</span></div>
+          <div class="stat-row"><span class="stat-label">Total descuentos</span><span class="stat-val text-danger">- Bs. 3,248</span></div>
+          <div class="stat-row"><span class="stat-label fw-600">Total neto pagado</span><span class="stat-val text-success fw-600">Bs. 18,152</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ 8. E-COMMERCE ═══════════ -->
+    <div class="module-page" id="page-ecommerce">
+      <div class="grid-2 mb-16">
+        <div class="card" style="border-left:3px solid var(--accent)">
+          <div class="card-header"><div><div class="card-title">🛍️ WooCommerce</div><div class="card-subtitle">wordpress.tienda.bo</div></div><span class="badge badge-success">● Conectado</span></div>
+          <div class="stat-row"><span class="stat-label">Pedidos importados hoy</span><span class="stat-val fw-600">14</span></div>
+          <div class="stat-row"><span class="stat-label">Última sincronización</span><span class="stat-val text-muted">Hace 5 min</span></div>
+          <div class="stat-row"><span class="stat-label">Productos sincronizados</span><span class="stat-val">248 / 284</span></div>
+          <button class="btn btn-secondary btn-sm mt-16">🔄 Sincronizar ahora</button>
+        </div>
+        <div class="card" style="border-left:3px solid var(--accent2)">
+          <div class="card-header"><div><div class="card-title">🏪 PrestaShop</div><div class="card-subtitle">tienda2.empresa.bo</div></div><span class="badge badge-warning">● Sin conexión</span></div>
+          <div class="stat-row"><span class="stat-label">Estado</span><span class="stat-val text-warning">No configurado</span></div>
+          <button class="btn btn-primary btn-sm mt-16">⚡ Configurar conexión</button>
+        </div>
+      </div>
+
+      <div class="card mb-16">
+        <div class="card-header"><div class="card-title">Pedidos recientes de tienda online</div><span class="badge badge-info">14 nuevos hoy</span></div>
+        <div class="table-wrap" style="border:none">
+          <table>
+            <thead><tr><th>Pedido Web</th><th>Cliente</th><th>Productos</th><th>Total</th><th>Pago</th><th>Estado importación</th><th>En Dolibarr</th></tr></thead>
+            <tbody>
+              <tr><td class="mono accent">#WC-1024</td><td>Carlos Medina</td><td>Laptop HP + Mouse</td><td>Bs. 8,870</td><td><span class="badge badge-teal">QR</span></td><td><span class="badge badge-success">✓ Importado</span></td><td class="mono">FAC-2026-090</td></tr>
+              <tr><td class="mono accent">#WC-1023</td><td>Rosa Vargas</td><td>Monitor LG 27"</td><td>Bs. 3,200</td><td><span class="badge badge-info">Transferencia</span></td><td><span class="badge badge-success">✓ Importado</span></td><td class="mono">FAC-2026-089</td></tr>
+              <tr><td class="mono accent">#WC-1022</td><td>Pedro Jiménez</td><td>Impresora Epson x2</td><td>Bs. 3,700</td><td><span class="badge badge-warning">Efectivo</span></td><td><span class="badge badge-warning">⏳ Procesando</span></td><td class="text-muted">—</td></tr>
+              <tr><td class="mono accent">#WC-1021</td><td>Laura Quispe</td><td>Teclado Mecánico</td><td>Bs. 680</td><td><span class="badge badge-teal">QR</span></td><td><span class="badge badge-danger">✗ Sin stock</span></td><td class="text-muted">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Sincronización de Stock</div></div>
+          <div class="stat-row"><span class="stat-label">Laptop HP ProBook 450</span><div class="flex-center gap-8"><span>Dolibarr: 24</span><span style="color:var(--text3)">→</span><span>Web: 24 ✓</span></div></div>
+          <div class="stat-row"><span class="stat-label">Monitor LG 27"</span><div class="flex-center gap-8"><span>Dolibarr: 3</span><span style="color:var(--text3)">→</span><span class="text-warning">Web: 5 ⚠</span></div></div>
+          <div class="stat-row"><span class="stat-label">Mouse Logitech G305</span><div class="flex-center gap-8"><span>Dolibarr: 48</span><span style="color:var(--text3)">→</span><span>Web: 48 ✓</span></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Ventas online este mes</div></div>
+          <div class="stat-row"><span class="stat-label">Total pedidos</span><span class="stat-val">87</span></div>
+          <div class="stat-row"><span class="stat-label">Monto total</span><span class="stat-val text-success">Bs. 124,500</span></div>
+          <div class="stat-row"><span class="stat-label">Ticket promedio</span><span class="stat-val">Bs. 1,431</span></div>
+          <div class="stat-row"><span class="stat-label">Clientes nuevos</span><span class="stat-val">23</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ 9. NOTIFICACIONES ═══════════ -->
+    <div class="module-page" id="page-notificaciones">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(this,'tab-facturas-notif')">Recordatorios Facturas</button>
+        <button class="tab-btn" onclick="switchTab(this,'tab-tareas-notif')">Tareas y Proyectos</button>
+        <button class="tab-btn" onclick="switchTab(this,'tab-marketing')">Campañas Marketing</button>
+      </div>
+
+      <div id="tab-facturas-notif" class="tab-content active">
+        <div class="card mb-16">
+          <div class="card-header"><div class="card-title">⚙️ Configuración de Recordatorios Automáticos</div></div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div class="card" style="flex:1;min-width:200px;border-color:var(--accent)">
+              <div style="font-size:11px;text-transform:uppercase;color:var(--accent);letter-spacing:.1em;margin-bottom:8px">Aviso 1</div>
+              <div class="fw-600" style="font-size:20px">7 días</div>
+              <div class="text-muted mt-16">Recordatorio amistoso de factura próxima a vencer</div>
+              <div style="margin-top:10px"><span class="badge badge-info">Email</span> <span class="badge badge-teal">SMS</span></div>
+            </div>
+            <div class="card" style="flex:1;min-width:200px;border-color:var(--warning)">
+              <div style="font-size:11px;text-transform:uppercase;color:var(--warning);letter-spacing:.1em;margin-bottom:8px">Aviso 2</div>
+              <div class="fw-600" style="font-size:20px">15 días</div>
+              <div class="text-muted mt-16">Segundo recordatorio — tono más formal</div>
+              <div style="margin-top:10px"><span class="badge badge-info">Email</span></div>
+            </div>
+            <div class="card" style="flex:1;min-width:200px;border-color:var(--danger)">
+              <div style="font-size:11px;text-transform:uppercase;color:var(--danger);letter-spacing:.1em;margin-bottom:8px">Aviso 3</div>
+              <div class="fw-600" style="font-size:20px">30 días</div>
+              <div class="text-muted mt-16">Última notificación antes de gestión de cobro</div>
+              <div style="margin-top:10px"><span class="badge badge-info">Email</span> <span class="badge badge-danger">SMS urgente</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Facturas con recordatorio enviado</div><button class="btn btn-primary btn-sm" onclick="sendReminder()">📨 Enviar recordatorios ahora</button></div>
+          <div class="table-wrap" style="border:none">
+            <table>
+              <thead><tr><th>Factura</th><th>Cliente</th><th>Vencimiento</th><th>Días vencida</th><th>Último aviso</th><th>Próx. aviso</th></tr></thead>
+              <tbody>
+                <tr><td class="mono accent">FAC-2026-085</td><td>Agro Chuquisaca</td><td>01/05/2026</td><td class="text-danger fw-600">29 días</td><td>Aviso 3 enviado</td><td class="text-danger">—</td></tr>
+                <tr><td class="mono accent">FAC-2026-079</td><td>Constructora Futura</td><td>20/05/2026</td><td class="text-warning fw-600">10 días</td><td>Aviso 1 enviado</td><td>Aviso 2 — 15/06</td></tr>
+                <tr><td class="mono accent">FAC-2026-088</td><td>TechBolivia</td><td>10/06/2026</td><td>—</td><td>—</td><td>Aviso 1 — 03/06</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-tareas-notif" class="tab-content">
+        <div class="card-title mb-16">Alertas de Proyectos y Tareas</div>
+        <div class="email-list">
+          <div class="email-item unread"><div class="avatar" style="background:var(--danger);color:#fff;flex-shrink:0">!</div><div class="email-info"><div class="email-from">⚠️ Tarea vencida — Migración de datos (PRJ-001)</div><div class="email-subject">Asignado a: Ana Prado — Venció el 30/05/2026 — Sin completar</div></div><div class="email-time">Hoy 09:00</div></div>
+          <div class="email-item unread"><div class="avatar" style="background:var(--accent);color:#fff;flex-shrink:0">📋</div><div class="email-info"><div class="email-from">📋 Nueva tarea asignada — Capacitación usuarios</div><div class="email-subject">Luis Yucra — Inicio: 01/06/2026 — Prioridad: Alta</div></div><div class="email-time">Ayer 14:30</div></div>
+          <div class="email-item"><div class="avatar" style="background:var(--success);color:#fff;flex-shrink:0">✓</div><div class="email-info"><div class="email-from">✅ Tarea completada — Instalación servidor Linux</div><div class="email-subject">María Quispe completó la tarea — 100% de avance</div></div><div class="email-time">28/05 11:00</div></div>
+          <div class="email-item"><div class="avatar" style="background:var(--warning);color:var(--bg);flex-shrink:0">⏰</div><div class="email-info"><div class="email-from">⏰ Recordatorio — Auditoría IT finaliza en 3 días</div><div class="email-subject">PRJ-003 — 90% completado — Vence: 02/06/2026</div></div><div class="email-time">28/05 08:00</div></div>
+        </div>
+      </div>
+
+      <div id="tab-marketing" class="tab-content">
+        <div class="flex-center mb-16" style="justify-content:space-between"><div class="card-title">Campañas de Email Marketing</div><button class="btn btn-primary" onclick="openModal('modalCampania')">+ Nueva Campaña</button></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Campaña</th><th>Segmento</th><th>Destinatarios</th><th>Enviados</th><th>Apertura</th><th>Fecha</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td class="fw-600">Promoción Mayo — Equipos TI</td><td><span class="badge badge-info">Clientes</span></td><td>1,247</td><td>1,195</td><td class="text-success fw-600">38.4%</td><td>15/05/2026</td><td><span class="badge badge-success">Enviada</span></td></tr>
+              <tr><td class="fw-600">Newsletter Abril 2026</td><td><span class="badge badge-teal">Todos</span></td><td>1,412</td><td>1,380</td><td class="text-success fw-600">29.1%</td><td>01/04/2026</td><td><span class="badge badge-success">Enviada</span></td></tr>
+              <tr><td class="fw-600">Oferta especial — Prospectos</td><td><span class="badge badge-warning">Prospectos</span></td><td>58</td><td>—</td><td>—</td><td>10/06/2026</td><td><span class="badge badge-info">Programada</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ 10. API REST ═══════════ -->
+    <div class="module-page" id="page-api">
+      <div class="grid-2 mb-16">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Estado de la API</div><span class="badge badge-success">● Online</span></div>
+          <div class="stat-row"><span class="stat-label">URL base</span><span class="stat-val mono" style="font-size:11px">https://erp.empresa.bo/api/index.php</span></div>
+          <div class="stat-row"><span class="stat-label">Versión Dolibarr</span><span class="stat-val">v18.0.4</span></div>
+          <div class="stat-row"><span class="stat-label">Autenticación</span><span class="stat-val">API Key / Token</span></div>
+          <div class="stat-row"><span class="stat-label">Llamadas hoy</span><span class="stat-val">2,847</span></div>
+          <div class="divider"></div>
+          <div class="form-label">Tu API Key</div>
+          <div class="flex gap-8">
+            <input class="form-input" type="password" value="dol_api_xK9m2pQR7nL4vW8" id="apiKeyField">
+            <button class="btn btn-secondary" onclick="toggleApiKey()">👁</button>
+            <button class="btn btn-secondary" onclick="alert('Clave regenerada ✅')">🔄</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🧪 Probar Endpoint</div></div>
+          <div class="form-group">
+            <div class="form-label">Método</div>
+            <select class="form-select"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Endpoint</div>
+            <input class="form-input" value="/thirdparties" placeholder="/thirdparties">
+          </div>
+          <button class="btn btn-primary" onclick="runApiTest()" style="width:100%">▶ Ejecutar</button>
+          <div id="apiResult" style="margin-top:12px;padding:10px;background:var(--surface2);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent3);display:none;max-height:120px;overflow-y:auto"></div>
+        </div>
+      </div>
+
+      <div class="section-title">Endpoints disponibles</div>
+      <div class="api-endpoint"><span class="api-method method-get">GET</span><span class="api-path">/thirdparties</span><div class="api-desc">Listar todos los terceros (clientes, proveedores, prospectos) con paginación.</div></div>
+      <div class="api-endpoint"><span class="api-method method-post">POST</span><span class="api-path">/thirdparties</span><div class="api-desc">Crear un nuevo tercero en el sistema ERP.</div></div>
+      <div class="api-endpoint"><span class="api-method method-get">GET</span><span class="api-path">/invoices</span><div class="api-desc">Obtener lista de facturas filtradas por estado, fecha o cliente.</div></div>
+      <div class="api-endpoint"><span class="api-method method-post">POST</span><span class="api-path">/invoices</span><div class="api-desc">Crear una nueva factura de venta desde sistema externo.</div></div>
+      <div class="api-endpoint"><span class="api-method method-get">GET</span><span class="api-path">/products</span><div class="api-desc">Listar productos del catálogo con stock disponible en tiempo real.</div></div>
+      <div class="api-endpoint"><span class="api-method method-put">PUT</span><span class="api-path">/products/{id}/stock</span><div class="api-desc">Actualizar el nivel de stock de un producto en un almacén específico.</div></div>
+      <div class="api-endpoint"><span class="api-method method-get">GET</span><span class="api-path">/projects</span><div class="api-desc">Obtener lista de proyectos activos con porcentaje de avance y tareas.</div></div>
+      <div class="api-endpoint"><span class="api-method method-delete">DELETE</span><span class="api-path">/invoices/{id}</span><div class="api-desc">Eliminar una factura en estado borrador (validadas no pueden eliminarse).</div></div>
+    </div>
+
+    <!-- ═══════════ 11. BANCO Y CAJAS ═══════════ -->
+    <div class="module-page" id="page-banco">
+      <div class="flex gap-16 mb-16" style="flex-wrap:wrap">
+        <div class="bank-card bank-card-bg1" style="flex:1;min-width:260px">
+          <div style="font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:.1em">Cuenta Corriente</div>
+          <div class="bank-card-number">BNB **** **** 4521</div>
+          <div class="bank-card-label">Saldo disponible</div>
+          <div class="bank-card-balance">Bs. 128,450.00</div>
+          <div style="margin-top:12px;display:flex;justify-content:space-between;font-size:11px;opacity:.7"><span>Titular: Empresa TechSol SRL</span><span>Sucursal Sucre</span></div>
+        </div>
+        <div class="bank-card bank-card-bg2" style="flex:1;min-width:260px">
+          <div style="font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:.1em">Cuenta USD</div>
+          <div class="bank-card-number">BCB **** **** 8834</div>
+          <div class="bank-card-label">Saldo disponible</div>
+          <div class="bank-card-balance">$ 18,200.00</div>
+          <div style="margin-top:12px;display:flex;justify-content:space-between;font-size:11px;opacity:.7"><span>Titular: Empresa TechSol SRL</span><span>Sucursal Sucre</span></div>
+        </div>
+        <div class="card" style="flex:0 0 200px">
+          <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">💵 Caja Chica</div>
+          <div class="fw-600" style="font-size:24px">Bs. 2,800</div>
+          <div class="text-muted" style="margin-top:4px">Oficina Sucre</div>
+          <div class="divider"></div>
+          <button class="btn btn-secondary btn-sm" style="width:100%" onclick="openModal('modalCaja')">Registrar movimiento</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Movimientos recientes — BNB</div><button class="btn btn-secondary btn-sm">+ Añadir</button></div>
+          <div class="table-wrap" style="border:none">
+            <table>
+              <thead><tr><th>Fecha</th><th>Concepto</th><th>Entrada</th><th>Salida</th><th>Saldo</th></tr></thead>
+              <tbody>
+                <tr><td>30/05</td><td>Cobro FAC-089</td><td class="text-success">+12,080</td><td>—</td><td>128,450</td></tr>
+                <tr><td>29/05</td><td>Pago proveedor Dist.Sur</td><td>—</td><td class="text-danger">-8,500</td><td>116,370</td></tr>
+                <tr><td>28/05</td><td>Cobro FAC-082 Minera</td><td class="text-success">+50,850</td><td>—</td><td>124,870</td></tr>
+                <tr><td>27/05</td><td>Pago nómina empleados</td><td>—</td><td class="text-danger">-18,152</td><td>74,020</td></tr>
+                <tr><td>26/05</td><td>Cobro FAC-079</td><td class="text-success">+17,176</td><td>—</td><td>92,172</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Resumen financiero</div></div>
+          <div class="stat-row"><span class="stat-label">Entradas mayo</span><span class="stat-val text-success">+ Bs. 284,500</span></div>
+          <div class="stat-row"><span class="stat-label">Salidas mayo</span><span class="stat-val text-danger">- Bs. 142,300</span></div>
+          <div class="divider"></div>
+          <div class="stat-row"><span class="stat-label fw-600">Flujo neto</span><span class="stat-val text-success fw-600">+ Bs. 142,200</span></div>
+          <div class="divider"></div>
+          <div style="margin-top:8px">
+            <div class="form-label">Transferencia entre cuentas</div>
+            <div class="flex gap-8 mt-16">
+              <input class="form-input" placeholder="Monto Bs." style="flex:1">
+              <button class="btn btn-primary" onclick="alert('Transferencia registrada ✅')">Transferir</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ════════════════ MODALES ════════════════ -->
+
+<!-- Modal Nuevo Tercero -->
+<div class="modal-overlay" id="modalTercero">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">👥 Nuevo Tercero</span><button class="modal-close" onclick="closeModal('modalTercero')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label class="form-label">Razón Social *</label><input class="form-input" placeholder="Nombre de la empresa"></div><div class="form-group"><label class="form-label">NIT / CI *</label><input class="form-input" placeholder="Número de identificación"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Tipo</label><select class="form-select"><option>Cliente</option><option>Proveedor</option><option>Prospecto</option></select></div><div class="form-group"><label class="form-label">Ciudad</label><input class="form-input" placeholder="Sucre, La Paz..."></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="correo@empresa.bo"></div><div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" placeholder="4-XXXXXXX"></div></div>
+      <div class="form-group"><label class="form-label">Categoría</label><select class="form-select"><option>— Seleccionar —</option><option>VIP</option><option>Mayorista</option><option>Frecuente</option><option>Nuevo</option></select></div>
+      <div class="form-group"><label class="form-label">Notas</label><textarea class="form-textarea" placeholder="Condiciones especiales, observaciones..."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalTercero')">Cancelar</button><button class="btn btn-primary" onclick="saveAndClose('modalTercero','Tercero creado exitosamente ✅')">Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Nueva Factura -->
+<div class="modal-overlay" id="modalFactura">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header"><span class="modal-title">🧾 Nueva Factura</span><button class="modal-close" onclick="closeModal('modalFactura')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label class="form-label">Cliente *</label><select class="form-select"><option>— Seleccionar cliente —</option><option>Importaciones Norte S.R.L.</option><option>TechBolivia S.R.L.</option><option>Constructora Futura SRL</option></select></div><div class="form-group"><label class="form-label">Fecha *</label><input class="form-input" type="date" value="2026-05-30"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Vencimiento *</label><input class="form-input" type="date" value="2026-06-30"></div><div class="form-group"><label class="form-label">Método de pago</label><select class="form-select"><option>Transferencia</option><option>Efectivo</option><option>QR</option><option>Cheque</option></select></div></div>
+      <div class="divider"></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">Líneas de factura</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:var(--surface2)"><th style="padding:8px;text-align:left">Producto/Servicio</th><th style="padding:8px">Cant.</th><th style="padding:8px">Precio Unit.</th><th style="padding:8px">Subtotal</th></tr></thead>
+        <tbody id="invoiceLines">
+          <tr><td style="padding:6px"><input class="form-input" placeholder="Descripción del producto" style="font-size:12px;padding:6px 8px"></td><td style="padding:6px"><input class="form-input" type="number" value="1" style="width:60px;font-size:12px;padding:6px 8px"></td><td style="padding:6px"><input class="form-input" type="number" placeholder="0.00" style="width:100px;font-size:12px;padding:6px 8px"></td><td style="padding:6px;text-align:center;color:var(--text2)">—</td></tr>
+        </tbody>
+      </table>
+      <button class="btn btn-secondary btn-sm mt-16" onclick="addInvoiceLine()">+ Añadir línea</button>
+      <div class="divider"></div>
+      <div style="text-align:right"><div class="stat-row" style="justify-content:flex-end;gap:40px"><span class="stat-label">IVA 13%:</span><span>calculado</span></div><div class="stat-row" style="justify-content:flex-end;gap:40px"><span class="stat-label fw-600">Total:</span><span class="fw-600 text-success">—</span></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalFactura')">Cancelar</button><button class="btn btn-secondary" onclick="saveAndClose('modalFactura','Guardado como borrador 📝')">Guardar borrador</button><button class="btn btn-primary" onclick="saveAndClose('modalFactura','Factura validada y enviada ✅')">Validar y enviar</button></div>
+  </div>
+</div>
+
+<!-- Modal Ver Factura PDF -->
+<div class="modal-overlay" id="modalVerFactura">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header"><span class="modal-title">📄 Factura FAC-2026-088</span><button class="modal-close" onclick="closeModal('modalVerFactura')">×</button></div>
+    <div class="modal-body">
+      <div style="background:white;border-radius:8px;padding:24px;color:#1a1a2e">
+        <div style="display:flex;justify-content:space-between;margin-bottom:20px">
+          <div><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#1e3a8a">TechSol SRL</div><div style="font-size:12px;color:#666">Av. Hernando Siles 123, Sucre<br>NIT: 1023456789</div></div>
+          <div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#1e3a8a">FACTURA</div><div style="font-size:13px;color:#666">N° FAC-2026-088<br>Fecha: 10/05/2026</div></div>
+        </div>
+        <div style="background:#f8f9ff;border-radius:6px;padding:12px;margin-bottom:16px"><div style="font-size:12px;color:#666">Facturar a:</div><div style="font-weight:700;color:#1e3a8a">TechBolivia S.R.L.</div><div style="font-size:12px;color:#666">NIT: 2034567890 | La Paz, Bolivia</div></div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px">
+          <thead><tr style="background:#1e3a8a;color:white"><th style="padding:8px;text-align:left">Descripción</th><th style="padding:8px;text-align:right">Cant.</th><th style="padding:8px;text-align:right">P.Unit</th><th style="padding:8px;text-align:right">Subtotal</th></tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #eee"><td style="padding:8px">Implementación módulo Contabilidad</td><td style="padding:8px;text-align:right">1</td><td style="padding:8px;text-align:right">Bs. 15,000</td><td style="padding:8px;text-align:right">Bs. 15,000</td></tr>
+            <tr style="border-bottom:1px solid #eee"><td style="padding:8px">Capacitación usuarios (8h)</td><td style="padding:8px;text-align:right">8</td><td style="padding:8px;text-align:right">Bs. 875</td><td style="padding:8px;text-align:right">Bs. 7,000</td></tr>
+          </tbody>
+        </table>
+        <div style="text-align:right;font-size:13px"><div>Subtotal: Bs. 22,000</div><div>IVA 13%: Bs. 2,860</div><div style="font-size:16px;font-weight:800;color:#1e3a8a;margin-top:4px">TOTAL: Bs. 24,860</div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalVerFactura')">Cerrar</button><button class="btn btn-primary" onclick="alert('PDF descargado ✅')">⬇ Descargar PDF</button><button class="btn btn-secondary" onclick="alert('Factura enviada por email ✅')">📧 Enviar por email</button></div>
+  </div>
+</div>
+
+<!-- Modal Nueva Propuesta -->
+<div class="modal-overlay" id="modalPropuesta">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">📋 Nueva Propuesta Comercial</span><button class="modal-close" onclick="closeModal('modalPropuesta')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label class="form-label">Cliente / Prospecto</label><select class="form-select"><option>— Seleccionar —</option><option>Importaciones Norte</option><option>TechBolivia</option></select></div><div class="form-group"><label class="form-label">Fecha de validez</label><input class="form-input" type="date" value="2026-06-30"></div></div>
+      <div class="form-group"><label class="form-label">Título de la propuesta</label><input class="form-input" placeholder="Ej: Implementación ERP Dolibarr completo"></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Tipo</label><select class="form-select"><option>Servicios</option><option>Productos</option><option>Mixto</option></select></div><div class="form-group"><label class="form-label">Descuento global %</label><input class="form-input" type="number" placeholder="0" min="0" max="100"></div></div>
+      <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-textarea" placeholder="Condiciones especiales de entrega..."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalPropuesta')">Cancelar</button><button class="btn btn-primary" onclick="saveAndClose('modalPropuesta','Propuesta PRO-049 creada ✅')">Crear propuesta</button></div>
+  </div>
+</div>
+
+<!-- Modal Nueva Tarea -->
+<div class="modal-overlay" id="modalTarea">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">✅ Nueva Tarea</span><button class="modal-close" onclick="closeModal('modalTarea')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nombre de la tarea *</label><input class="form-input" placeholder="Describe la tarea..."></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Asignar a</label><select class="form-select"><option>Luis Yucra</option><option>María Quispe</option><option>Ana Prado</option><option>Juan Mamani</option></select></div><div class="form-group"><label class="form-label">Prioridad</label><select class="form-select"><option>Alta</option><option>Media</option><option>Normal</option><option>Baja</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Fecha inicio</label><input class="form-input" type="date"></div><div class="form-group"><label class="form-label">Fecha fin</label><input class="form-input" type="date"></div></div>
+      <div class="form-group"><label class="form-label">Horas estimadas</label><input class="form-input" type="number" placeholder="0"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalTarea')">Cancelar</button><button class="btn btn-primary" onclick="saveAndClose('modalTarea','Tarea creada y notificación enviada ✅')">Guardar tarea</button></div>
+  </div>
+</div>
+
+<!-- Modal Nuevo Producto -->
+<div class="modal-overlay" id="modalProducto">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">📦 Nuevo Producto</span><button class="modal-close" onclick="closeModal('modalProducto')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nombre del producto *</label><input class="form-input" placeholder="Nombre descriptivo"></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">SKU / Referencia</label><input class="form-input" placeholder="SKU-XXX-000"></div><div class="form-group"><label class="form-label">Tipo</label><select class="form-select"><option>Producto físico</option><option>Servicio</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Precio de venta (Bs.)</label><input class="form-input" type="number" placeholder="0.00"></div><div class="form-group"><label class="form-label">Stock inicial</label><input class="form-input" type="number" placeholder="0"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Stock mínimo</label><input class="form-input" type="number" placeholder="5"></div><div class="form-group"><label class="form-label">Almacén</label><select class="form-select"><option>Almacén Principal</option><option>Tienda</option><option>Reserva</option></select></div></div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" placeholder="Descripción del producto..."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalProducto')">Cancelar</button><button class="btn btn-primary" onclick="saveAndClose('modalProducto','Producto creado en inventario ✅')">Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Ver Producto -->
+<div class="modal-overlay" id="modalProductoVer">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">📦 Laptop HP ProBook 450</span><button class="modal-close" onclick="closeModal('modalProductoVer')">×</button></div>
+    <div class="modal-body">
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
+        <div style="width:80px;height:80px;background:rgba(79,142,247,.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px">💻</div>
+        <div><div class="fw-600" style="font-size:16px">Laptop HP ProBook 450</div><div class="mono text-muted">SKU: LPT-HP-450</div><div class="mt-16"><span class="badge badge-success">En stock</span></div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-row"><span class="stat-label">Stock físico</span><span class="stat-val fw-600 text-success">24 unidades</span></div>
+      <div class="stat-row"><span class="stat-label">Stock virtual</span><span class="stat-val fw-600">22 unidades</span></div>
+      <div class="stat-row"><span class="stat-label">Stock mínimo</span><span class="stat-val">5 unidades</span></div>
+      <div class="stat-row"><span class="stat-label">Precio de venta</span><span class="stat-val text-accent fw-600">Bs. 8,450</span></div>
+      <div class="stat-row"><span class="stat-label">Precio de costo</span><span class="stat-val">Bs. 6,800</span></div>
+      <div class="stat-row"><span class="stat-label">Almacén</span><span class="stat-val">Almacén Principal</span></div>
+      <div class="divider"></div>
+      <div class="form-label">Ajuste de stock</div>
+      <div class="flex gap-8">
+        <input class="form-input" type="number" placeholder="Cantidad" style="flex:1">
+        <select class="form-select" style="flex:1"><option>Entrada</option><option>Salida</option><option>Ajuste</option></select>
+        <button class="btn btn-primary" onclick="alert('Movimiento de stock registrado ✅');closeModal('modalProductoVer')">Registrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nuevo Empleado -->
+<div class="modal-overlay" id="modalEmpleado">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">🧑‍💼 Nuevo Empleado</span><button class="modal-close" onclick="closeModal('modalEmpleado')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label class="form-label">Nombre completo *</label><input class="form-input" placeholder="Apellidos y nombres"></div><div class="form-group"><label class="form-label">CI</label><input class="form-input" placeholder="Cédula de identidad"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Cargo *</label><input class="form-input" placeholder="Ej: Analista de Sistemas"></div><div class="form-group"><label class="form-label">Departamento</label><select class="form-select"><option>TI</option><option>Finanzas</option><option>Ventas</option><option>Administración</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Sueldo base (Bs.)</label><input class="form-input" type="number" placeholder="0.00"></div><div class="form-group"><label class="form-label">Tipo contrato</label><select class="form-select"><option>Indefinido</option><option>Plazo fijo</option><option>Por obra</option></select></div></div>
+      <div class="form-group"><label class="form-label">Email corporativo</label><input class="form-input" type="email" placeholder="usuario@empresa.bo"></div>
+      <div class="form-group"><label class="form-label">Fecha de ingreso</label><input class="form-input" type="date" value="2026-05-30"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalEmpleado')">Cancelar</button><button class="btn btn-primary" onclick="saveAndClose('modalEmpleado','Empleado registrado y cuenta creada ✅')">Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Solicitar Ausencia -->
+<div class="modal-overlay" id="modalAusencia">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">🗓️ Solicitar Ausencia</span><button class="modal-close" onclick="closeModal('modalAusencia')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Empleado</label><select class="form-select"><option>Luis Yucra</option><option>María Quispe</option><option>Ana Prado</option><option>Juan Mamani</option></select></div>
+      <div class="form-group"><label class="form-label">Tipo de ausencia</label><select class="form-select"><option>Vacaciones anuales</option><option>Enfermedad</option><option>Permiso personal</option><option>Permiso sin sueldo</option></select></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Desde</label><input class="form-input" type="date"></div><div class="form-group"><label class="form-label">Hasta</label><input class="form-input" type="date"></div></div>
+      <div class="form-group"><label class="form-label">Motivo</label><textarea class="form-textarea" placeholder="Descripción del motivo..."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalAusencia')">Cancelar</button><button class="btn btn-primary" onclick="saveAndClose('modalAusencia','Solicitud enviada al supervisor ✅')">Enviar solicitud</button></div>
+  </div>
+</div>
+
+<!-- Modal Campaña Marketing -->
+<div class="modal-overlay" id="modalCampania">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">📣 Nueva Campaña</span><button class="modal-close" onclick="closeModal('modalCampania')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nombre de la campaña *</label><input class="form-input" placeholder="Ej: Promoción Junio 2026"></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Segmento</label><select class="form-select"><option>Todos</option><option>Clientes</option><option>Prospectos</option><option>Proveedores</option></select></div><div class="form-group"><label class="form-label">Canal</label><select class="form-select"><option>Email</option><option>SMS</option><option>Email + SMS</option></select></div></div>
+      <div class="form-group"><label class="form-label">Asunto del email</label><input class="form-input" placeholder="Asunto que verá el destinatario"></div>
+      <div class="form-group"><label class="form-label">Mensaje</label><textarea class="form-textarea" style="min-height:100px" placeholder="Cuerpo del mensaje..."></textarea></div>
+      <div class="form-group"><label class="form-label">Programar envío</label><input class="form-input" type="datetime-local"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalCampania')">Cancelar</button><button class="btn btn-secondary" onclick="saveAndClose('modalCampania','Campaña guardada como borrador 📝')">Guardar borrador</button><button class="btn btn-primary" onclick="saveAndClose('modalCampania','Campaña programada ✅')">Programar</button></div>
+  </div>
+</div>
+
+<!-- Modal Movimiento Caja -->
+<div class="modal-overlay" id="modalCaja">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">💵 Movimiento de Caja</span><button class="modal-close" onclick="closeModal('modalCaja')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label class="form-label">Tipo</label><select class="form-select"><option>Ingreso</option><option>Egreso</option></select></div><div class="form-group"><label class="form-label">Monto (Bs.)</label><input class="form-input" type="number" placeholder="0.00"></div></div>
+      <div class="form-group"><label class="form-label">Concepto *</label><input class="form-input" placeholder="Descripción del movimiento"></div>
+      <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" value="2026-05-30"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modalCaja')">Cancelar</button><button class="btn btn-primary" onclick="saveAndClose('modalCaja','Movimiento registrado en caja ✅')">Registrar</button></div>
+  </div>
+</div>
+
+<script>
+// ═══════════ NAVEGACIÓN ═══════════
+const titles = {
+  dashboard: 'Dashboard <span>Resumen general del sistema</span>',
+  terceros: 'Módulo de Terceros <span>Clientes, Proveedores y Prospectos</span>',
+  facturacion: 'Módulo de Facturación <span>Control de ingresos y cobros</span>',
+  propuestas: 'Propuestas Comerciales <span>Gestión del ciclo de venta</span>',
+  proyectos: 'Proyectos y Tareas <span>Planificación y seguimiento</span>',
+  inventario: 'Gestión de Inventario <span>Stock, productos y almacenes</span>',
+  contabilidad: 'Contabilidad — Partida Doble <span>Libro mayor, balance y conciliación</span>',
+  rrhh: 'Recursos Humanos <span>Empleados, ausencias y nómina</span>',
+  ecommerce: 'Integración E-Commerce <span>WooCommerce y PrestaShop</span>',
+  notificaciones: 'Notificaciones <span>Email, SMS y alertas automáticas</span>',
+  api: 'API REST <span>Web services e integración externa</span>',
+  banco: 'Banco y Cajas <span>Gestión de tesorería y cuentas</span>',
+};
+
+function showModule(id) {
+  document.querySelectorAll('.module-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  document.getElementById('pageTitle').innerHTML = titles[id] || id;
+  event.currentTarget.classList.add('active');
+  document.getElementById('notifPopup').classList.remove('open');
+}
+
+// ═══════════ TABS ═══════════
+function switchTab(btn, tabId) {
+  const container = btn.closest('.module-page');
+  container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  container.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const tab = document.getElementById(tabId);
+  if (tab) tab.classList.add('active');
+}
+
+// ═══════════ MODALES ═══════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function saveAndClose(id, msg) { closeModal(id); setTimeout(() => showToast(msg), 100); }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+
+// ═══════════ TOAST ═══════════
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:#1a2540;border:1px solid var(--accent);color:var(--text);padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:fadeSlide .3s ease';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+// ═══════════ NOTIFICACIONES ═══════════
+function toggleNotif() {
+  const p = document.getElementById('notifPopup');
+  p.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const p = document.getElementById('notifPopup');
+  if (!e.target.closest('#notifPopup') && !e.target.closest('.icon-btn')) p.classList.remove('open');
+});
+
+// ═══════════ GRÁFICO DE BARRAS ═══════════
+const months = ['E','F','M','A','M','J','J','A','S','O','N','D'];
+const values = [142,168,195,210,188,284,0,0,0,0,0,0];
+const colors = ['var(--accent2)','var(--accent2)','var(--accent)','var(--accent)','var(--accent3)','var(--accent)'];
+const maxV = Math.max(...values.filter(v=>v>0));
+const chart = document.getElementById('salesChart');
+const labels = document.getElementById('salesLabels');
+months.forEach((m,i) => {
+  if (values[i] === 0) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'chart-bar-wrap';
+  const bar = document.createElement('div');
+  bar.className = 'chart-bar';
+  bar.style.height = (values[i]/maxV*90)+'px';
+  bar.style.background = colors[i] || 'var(--border)';
+  wrap.appendChild(bar);
+  chart.appendChild(wrap);
+  const lbl = document.createElement('span');
+  lbl.style.cssText = 'font-size:10px;color:var(--text2)';
+  lbl.textContent = m;
+  labels.appendChild(lbl);
+});
+
+// ═══════════ FUNCIONES EXTRA ═══════════
+function filterTercero(btn, type) {
+  btn.closest('.tabs').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  showToast('Filtro aplicado: ' + btn.textContent.split('(')[0].trim());
+}
+function approveAbsence(btn) {
+  const row = btn.closest('tr');
+  row.querySelector('.badge').className = 'badge badge-success';
+  row.querySelector('.badge').textContent = 'Aprobada';
+  row.querySelector('td:last-child').innerHTML = '';
+  showToast('Ausencia aprobada ✅');
+}
+function toggleApiKey() {
+  const f = document.getElementById('apiKeyField');
+  f.type = f.type === 'password' ? 'text' : 'password';
+}
+function runApiTest() {
+  const r = document.getElementById('apiResult');
+  r.style.display = 'block';
+  r.textContent = 'Ejecutando petición...';
+  setTimeout(() => {
+    r.textContent = JSON.stringify({
+      "status": 200,
+      "data": [
+        {"id":1,"name":"Importaciones Norte S.R.L.","client":1,"supplier":0,"status":1},
+        {"id":2,"name":"TechBolivia S.R.L.","client":1,"supplier":0,"status":1},
+        {"id":3,"name":"Distribuidora Sur S.A.","client":0,"supplier":1,"status":1}
+      ],
+      "total": 48
+    }, null, 2);
+  }, 800);
+}
+function sendReminder() {
+  showToast('Recordatorios enviados a 3 clientes con facturas vencidas 📧');
+}
+function addInvoiceLine() {
+  const tb = document.getElementById('invoiceLines');
+  const row = document.createElement('tr');
+  row.innerHTML = '<td style="padding:6px"><input class="form-input" placeholder="Descripción" style="font-size:12px;padding:6px 8px"></td><td style="padding:6px"><input class="form-input" type="number" value="1" style="width:60px;font-size:12px;padding:6px 8px"></td><td style="padding:6px"><input class="form-input" type="number" placeholder="0.00" style="width:100px;font-size:12px;padding:6px 8px"></td><td style="padding:6px;text-align:center;color:var(--text2)">—</td>';
+  tb.appendChild(row);
+}
+function toggleInvView() {
+  showToast('Vista cambiada a tabla');
+}
+</script>
+</body>
+</html>
